@@ -29,4 +29,3 @@ Lovable is not required. Vercel is a candidate for the Next.js frontend and shor
 Do not commit API keys, university passwords, browser sessions, course files, recordings or generated private notes. The repository contains generic code only. Use official transcripts or permitted capture; do not bypass access or download restrictions.
 
 Provider reference: https://developers.openai.com/api/reference/resources/models/methods/list
-
