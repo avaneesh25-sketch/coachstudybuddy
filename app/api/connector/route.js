@@ -1,0 +1,2 @@
+import fs from 'node:fs/promises';import path from 'node:path';import {zipSync,strToU8} from 'fflate';
+export async function GET(){const files={};for(const name of ['manifest.json','popup.html','popup.css','popup.js','collector.js','README.md'])files[name]=strToU8(await fs.readFile(path.join(process.cwd(),'extension',name),'utf8'));return new Response(zipSync(files),{headers:{'Content-Type':'application/zip','Content-Disposition':'attachment; filename="coachstudybuddy-connector.zip"','Cache-Control':'no-store'}})}

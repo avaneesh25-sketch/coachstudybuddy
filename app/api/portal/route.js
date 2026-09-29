@@ -1,0 +1,6 @@
+import {sameOrigin,jsonBody,reply,failure,InputError} from '../../../lib/http.js';import {newPair,pair,validateImport} from '../../../lib/portal.js';
+export const runtime='nodejs';
+function local(request){if(!['localhost','127.0.0.1'].includes(new URL(request.url).hostname))throw new InputError('This connector is currently local-only.',403)}
+export async function POST(request){try{local(request);const token=request.headers.get('x-pairing-code');if(!token){sameOrigin(request);return reply({token:newPair(),expiresInMinutes:30})}const session=pair(token);const item=validateImport(await jsonBody(request,16000));if(session.imports.length>=30)throw new InputError('Import limit reached. Start a new pairing.',429);session.imports.push({...item,id:session.imports.length+1});return reply({ok:true,count:item.materials.length})}catch(e){return failure(e)}}
+export async function GET(request){try{local(request);const s=pair(request.headers.get('x-pairing-code'));return reply({imports:s.imports})}catch(e){return failure(e)}}
+export async function DELETE(request){try{local(request);sameOrigin(request);const s=pair(request.headers.get('x-pairing-code'));s.imports=[];s.expires=0;return reply({ok:true})}catch(e){return failure(e)}}

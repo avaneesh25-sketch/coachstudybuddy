@@ -1,31 +1,27 @@
 # CoachStudyBuddy
 
-A BYOK web application for turning permitted lecture audio and course slides into source-backed study notes.
-
-## Current increment
-
-- Next.js application with responsive lecture workspace and AI connection settings.
-- OpenAI API key test via a fixed server-side provider endpoint. Keys remain in page memory, pass through the server only for the request, and are never explicitly persisted or logged. Clear key or reload to remove the key from the page.
-- Lecture drafts with local PDF/PPTX selection. These are memory-only: no upload, extraction or persistence yet.
-- Explicit pending states for capture, transcription, comparison and PDF export. No simulated AI results.
+A local BYOK lecture study pilot, built with Next.js. Uses permitted lecture audio and course documents to produce source-linked notes.
 
 ## Run
 
-Node.js 20.9+ and pnpm. Run `pnpm install`, `pnpm dev`; open http://127.0.0.1:3001. Production check: `pnpm build`. Tests: `pnpm test`.
+Use Node.js 20.9+ and pnpm. Run `pnpm install`, `pnpm build`, then `pnpm start`. Open http://127.0.0.1:3001. For development use `pnpm dev`. Run `pnpm test` for automated tests.
 
-## Workflow roadmap
+## Pilot workflow
 
-1. BYOK setup and lecture draft (this increment).
-2. User-initiated permitted tab-audio capture, short sample first; verify audio before paid transcription.
-3. Timestamped transcription and PDF/PPTX extraction, with a clear disclosure and cost estimate before sending content to the chosen provider.
-4. Compare slides and transcript; cite slide numbers and timestamps for professor additions, examples and explicit emphasis. Flag gaps and uncertainty.
-5. Reviewable integrated notes and polished PDF export.
-6. Optional authorized course connectors and idempotent detection of new/revised materials.
+1. Enter your own OpenAI API key in AI connection. Keys stay in page memory and are passed to the fixed provider endpoints only for requests; they are not deliberately saved or logged.
+2. Create a lecture draft. Follow `/connector` to load the provided Chrome/Edge extension, pair it with the local app, and import visible course document links. Open the normal document tab if the portal card has no visible link. The connector does not read university passwords or cookies.
+3. Fetch documents for local PDF/PPTX text extraction. A file fallback is available. Current supported remote documents are direct Filestack links. Scanned PDFs and diagram interpretation are not supported.
+4. Capture up to five minutes of permitted lecture tab audio at 1x. The browser requires user selection and audio sharing. Listen to the sample before sending it for paid Whisper transcription. Timestamps are sample-relative.
+5. Send the transcript and extracted slides to OpenAI for cited additions, examples, explicit emphasis and integrated notes. Review the result, save JSON, or use Print / Save PDF.
 
-## Hosting boundary
+## Verified and limitations
 
-Lovable is not required. Vercel is a candidate for the Next.js frontend and short request handlers. Add authentication, request rate limits, private storage, retention controls and a durable processing worker before production hosting. This development preview is not production hardened. Hosting is not configured.
+19 automated tests pass, covering extraction, timestamps, citation validation, request guards and connector filtering. Production build passes. The local server pairing/import/poll path and extraction of a 33-page course PDF were verified. Tests mock AI responses: real paid transcription, real generated notes, print layout and installed-extension operation still need a user pilot.
 
-Do not commit API keys, university passwords, browser sessions, course files, recordings or generated private notes. The repository contains generic code only. Use official transcripts or permitted capture; do not bypass access or download restrictions.
+All lecture content is session-only. Download backups before reloading. Pairing expires after 30 minutes and is held in server memory. This pilot does not automatically detect new lectures, persist a library, or process whole lectures. The extension imports visible supported links only; it does not bypass restrictions or inspect hidden portal state.
 
-Provider reference: https://developers.openai.com/api/reference/resources/models/methods/list
+## Hosting
+
+This increment runs locally. The connector is local-only and is not ready for Vercel deployment. Add application authentication, durable private storage, rate limits, retention controls and long-running processing before production hosting.
+
+Never commit keys, passwords, university sessions, recordings, course documents or private notes. The repository contains generic code only.
