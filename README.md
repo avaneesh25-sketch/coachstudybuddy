@@ -16,7 +16,7 @@ Use Node.js 20.9+ and pnpm. Run `pnpm install`, `pnpm build`, then `pnpm start`.
 
 ## Verified and limitations
 
-19 automated tests pass, covering extraction, timestamps, citation validation, request guards and connector filtering. Production build passes. The local server pairing/import/poll path and extraction of a 33-page course PDF were verified. Tests mock AI responses: real paid transcription, real generated notes, print layout and installed-extension operation still need a user pilot.
+26 automated tests pass, covering extraction, timestamps, citation validation, request guards and connector filtering. Production build passes. The local server pairing/import/poll path and extraction of a 33-page course PDF were verified. Tests mock AI responses: real paid transcription, real generated notes, print layout and installed-extension operation still need a user pilot.
 
 All lecture content is session-only. Download backups before reloading. Pairing expires after 30 minutes and is held in server memory. This pilot does not automatically detect new lectures, persist a library, or process whole lectures. The extension imports visible supported links only; it does not bypass restrictions or inspect hidden portal state.
 
@@ -25,3 +25,11 @@ All lecture content is session-only. Download backups before reloading. Pairing 
 This increment runs locally. The connector is local-only and is not ready for Vercel deployment. Add application authentication, durable private storage, rate limits, retention controls and long-running processing before production hosting.
 
 Never commit keys, passwords, university sessions, recordings, course documents or private notes. The repository contains generic code only.
+
+## AI providers
+
+Select OpenAI, Google Gemini / AI Studio, or Other OpenAI-compatible API in AI connection. Provider changes clear the key. Connection tests use the selected service's model-list endpoint, and do not prove billing or per-model feature access. Google keys use the x-goog-api-key header. Gemini supports inline WebM transcription with approximate timestamps and structured note generation. Default Gemini model is gemini-flash-latest; IDs are editable.
+
+Compatible services need a public HTTPS API base URL, Bearer authentication, model listing, JSON chat completions and a notes model. For audio, they additionally need /audio/transcriptions with verbose_json segment timestamps and an audio model ID. APIs with other protocols or authentication are not supported automatically. Custom endpoints resolve to public IPv4 addresses and TLS connections are pinned to prevent DNS rebinding; redirects are not followed. Keys and content go only to the explicitly selected provider. Provider routing is covered by mocked tests; real Gemini and custom-provider processing still require a valid user key and quota.
+
+Save the audio backup before updating/reloading. Restore a saved audio sample in the updated app to keep your recording. No API key from chat is embedded or reused.

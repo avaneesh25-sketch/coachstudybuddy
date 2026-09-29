@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {configuration,endpoint,publicIPv4,geminiJson} from '../lib/providers.js';
+import {checkProvider} from '../lib/provider.js';
+import {transcribe} from '../lib/transcribe.js';
+import {generateNotes} from '../lib/notes.js';
+const key='test-key-not-a-real-secret';
+const gemini={provider:'gemini'};
+const response=value=>Response.json({candidates:[{finishReason:'STOP',content:{parts:[{text:JSON.stringify(value)}]}}]});
+test('Gemini key is sent to Google only, in a header',async()=>{const r=await checkProvider(key,async(url,opts)=>{assert.equal(url,'https://generativelanguage.googleapis.com/v1beta/models');assert.equal(opts.headers['x-goog-api-key'],key);assert.equal(opts.headers.Authorization,undefined);return Response.json({models:[]})},gemini);assert.equal(r.connected,true)});
+test('custom endpoints reject credentials, non-HTTPS and private addresses',()=>{for(const url of ['http://api.example.com/v1','https://127.0.0.1/v1','https://user:secret@api.example.com','https://api.example.com?key=x','https://localhost/v1'])assert.throws(()=>endpoint(url));for(const ip of ['127.0.0.1','10.1.1.1','169.254.169.254','172.16.0.1','192.168.1.1','100.64.0.1','::1'])assert.equal(publicIPv4(ip),false);assert.equal(publicIPv4('8.8.8.8'),true);assert.throws(()=>configuration({provider:'unknown'}))});
+test('Gemini transcription sends inline audio and validates sample timestamps',async()=>{const b=Buffer.alloc(100);b.writeUInt32BE(0x1a45dfa3);const out=await transcribe(b,key,async(url,opts)=>{assert.match(url,/googleapis.com/);const body=JSON.parse(opts.body);assert.equal(body.contents[0].parts[1].inlineData.data,b.toString('base64'));return response({segments:[{start:0,end:2,text:'Lecture test'}]})},gemini);assert.equal(out.segments[0].text,'Lecture test');assert.match(out.clock,/Approximate/)});
+test('Gemini refuses incomplete generation',async()=>{await assert.rejects(geminiJson(configuration(gemini),key,[],{},async()=>Response.json({candidates:[{finishReason:'MAX_TOKENS'}]})),/complete result/)});
+const input={materials:[{id:'doc',name:'slides',pages:[{number:1,text:'Strategy'}]}],segments:[{id:1,start:0,end:2,text:'An example'}]};
+const notes={sections:[{heading:'Example',kind:'example',text:'An example',sources:['t1']}],limitations:['Short sample']};
+test('Gemini notes retain citation validation',async()=>{assert.deepEqual(await generateNotes(input,key,async()=>response(notes),gemini),notes);await assert.rejects(generateNotes(input,key,async()=>response({...notes,sections:[{...notes.sections[0],sources:['invented']}]}),gemini),/source references/)});
+test('compatible provider routes JSON notes to configured endpoint',async()=>{const c={provider:'compatible',baseUrl:'https://api.example.com/v1',model:'vendor/model'};const out=await generateNotes(input,key,async(url,opts)=>{assert.equal(url,c.baseUrl+'/chat/completions');assert.equal(JSON.parse(opts.body).model,c.model);assert.equal(opts.headers.Authorization,'Bearer '+key);return Response.json({choices:[{finish_reason:'stop',message:{content:JSON.stringify(notes)}}]})},c);assert.deepEqual(out,notes)});
+test('compatible audio requires an explicit model before making requests',async()=>{const b=Buffer.alloc(100);b.writeUInt32BE(0x1a45dfa3);await assert.rejects(transcribe(b,key,async()=>{throw Error('should not call')},{provider:'compatible',baseUrl:'https://api.example.com/v1',model:'notes'}),/audio transcription model/)});
