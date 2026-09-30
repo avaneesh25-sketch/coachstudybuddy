@@ -33,3 +33,7 @@ Select OpenAI, Google Gemini / AI Studio, or Other OpenAI-compatible API in AI c
 Compatible services need a public HTTPS API base URL, Bearer authentication, model listing, JSON chat completions and a notes model. For audio, they additionally need /audio/transcriptions with verbose_json segment timestamps and an audio model ID. APIs with other protocols or authentication are not supported automatically. Custom endpoints resolve to public IPv4 addresses and TLS connections are pinned to prevent DNS rebinding; redirects are not followed. Keys and content go only to the explicitly selected provider. Provider routing is covered by mocked tests; real Gemini and custom-provider processing still require a valid user key and quota.
 
 Save the audio backup before updating/reloading. Restore a saved audio sample in the updated app to keep your recording. No API key from chat is embedded or reused.
+
+## Shareable hosted pilot
+
+The Vercel web version uses user-provided keys and session-only study data. Hosted document uploads are limited to 4 MB; local uploads allow 10 MB. Five-minute audio samples remain under 4 MB. The portal extension and pairing stay local-only; hosted users add permitted PDF/PPTX files manually. No account library or permanent media storage is provided. Download audio/notes before closing or refreshing. AI provider availability and account quotas still apply.
