@@ -37,3 +37,9 @@ Save the audio backup before updating/reloading. Restore a saved audio sample in
 ## Shareable hosted pilot
 
 The Vercel web version uses user-provided keys and session-only study data. Hosted document uploads are limited to 4 MB; local uploads allow 10 MB. Five-minute audio samples remain under 4 MB. The portal extension and pairing stay local-only; hosted users add permitted PDF/PPTX files manually. No account library or permanent media storage is provided. Download audio/notes before closing or refreshing. AI provider availability and account quotas still apply.
+
+## University selection workflow (v0.3)
+
+The primary UI no longer asks for manual lecture names or notes uploads. It asks users to install the browser connector once, sign into the university portal, enter a subject code, resolve any duplicate course matches, and choose a lecture from the live portal list. Find & import searches the chosen session's visible materials/pre-read/resource links and extracts up to five accessible documents. The extension bridge works on the production Vercel origin without a localhost server or server-memory pairing. No portal password is entered in CoachStudyBuddy.
+
+The connector needs Chrome/Edge installation in the same profile as the portal and app. Live extension operation is not verified in the in-app browser, which cannot load it. Interactive cards without direct links may require opening the portal material panel and retrying. This is a pilot connector, not a guarantee that every resource can be imported.
