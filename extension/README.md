@@ -7,3 +7,5 @@ The app content script accepts only known request types from its own window/orig
 Course lookup preserves termCourseId because codes may repeat. Lectures are parsed from visible session labels, and the chosen session is expanded using normal read-only controls. Accessible direct Filestack document links are returned to the app, which requests extraction. Interactive cards without links and protected or external documents can remain unsupported. No claim of complete course coverage is made.
 
 This is a development extension, not a store release. Live extraction must be verified after installation. No fake lecture choices or private course data are bundled.
+
+Version 0.4 adds the official transcript action. It requires the selected recording and Download Transcript control to be visible. It reads only official links or newly exposed download anchors; it never reads hidden API state or recording streams. If the file is not exposed, import the downloaded transcript in the app. Reload this extension and CoachStudyBuddy after updating.

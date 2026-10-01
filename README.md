@@ -43,3 +43,17 @@ The Vercel web version uses user-provided keys and session-only study data. Host
 The primary UI no longer asks for manual lecture names or notes uploads. It asks users to install the browser connector once, sign into the university portal, enter a subject code, resolve any duplicate course matches, and choose a lecture from the live portal list. Find & import searches the chosen session's visible materials/pre-read/resource links and extracts up to five accessible documents. The extension bridge works on the production Vercel origin without a localhost server or server-memory pairing. No portal password is entered in CoachStudyBuddy.
 
 The connector needs Chrome/Edge installation in the same profile as the portal and app. Live extension operation is not verified in the in-app browser, which cannot load it. Interactive cards without direct links may require opening the portal material panel and retrying. This is a pilot connector, not a guarantee that every resource can be imported.
+
+## Transcript-first study library (v0.4)
+
+The official transcript is preferred over paid speech-to-text. In the selected lecture player, the connector can invoke the visible Download Transcript control and read an exposed official download. It validates that the player identifies the selected session. If the portal does not expose the downloaded file to the connector, choose the downloaded TXT, VTT, SRT or JSON file. Missing timestamps stay untimed. Live portal download automation remains unverified; a success toast is not proof of a retrieved transcript.
+
+Generate notes after importing the session resources. Teaching-style observations require transcript citations and may describe evidence such as examples and questions, never unsupported personality traits. Inputs above the current 200,000-character comparison limit are rejected before an AI request, rather than silently truncated.
+
+Download a paginated PDF, or connect a fine-grained GitHub token scoped to a private study repository with Contents read/write. Tokens are kept in tab memory, never localStorage or Git. Repository visibility and push permissions are checked server-side on every save. The PDF, transcript JSON and study-pack JSON are committed together under `Term/Subject/Session number - name/`. Conflicting branch updates never force-push. Save the same folder again to update it with Git history.
+
+Up to 30 processed sessions can be queued for one ZIP download or sequential GitHub saves. The queue stays in tab memory and warns before closing. Failed saves retain unfinished items. This is a bulk study-pack export, not automated downloading of every recording.
+
+Optional video capture appears only after the server verifies a GitHub account email matching the deployment's `VIDEO_OWNER_EMAIL_SHA256`. Set this to the SHA-256 of the lowercase permitted email. Missing configuration, unverified emails, or unavailable email permissions deny access. The token needs Email addresses read permission for this check. Access is rechecked before capture. The browser still requires explicit screen/tab-sharing consent. Recording stops at 30 minutes or approximately 90 MB and downloads locally; it is not sent to AI or GitHub. Protected recordings are not bypassed.
+
+Validation: parser, citation, PDF extraction, private repository enforcement, atomic commits and verified-email gate unit tests. Live university download, a real AI summary, authorized video capture and user-token GitHub export still need end-to-end verification.
