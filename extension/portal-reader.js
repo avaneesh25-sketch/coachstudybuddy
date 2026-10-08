@@ -6,6 +6,20 @@ export async function portalAction(action,payload){
  const wait=async fn=>{for(let i=0;i<40;i++){const value=fn();if(value)return value;await new Promise(r=>setTimeout(r,250))}return null};
  if(location.origin!=='https://coach.mastersunion.org')throw Error('Sign in to the university portal first.');
  if(action==='courses'){
+  if(payload.term!==undefined){
+   const term=String(payload.term);if(!/^\d$/.test(term))throw Error('Choose a valid term.');
+   const radio=()=>all('input[type="radio"]').find(e=>(e.closest('label')?.innerText||e.parentElement?.innerText||'').trim().replace(/\s+/g,' ').match(new RegExp('^Term '+term+'(?: Current)?$')));
+   let choice=radio();
+   if(!choice){const control=await wait(()=>all('button,div,span').find(e=>e.children.length===0&&/^Term \d+(?: Current)?$/.test(e.textContent.trim())));if(!control)throw Error('Term selector not found. Open Courses in the portal and try again.');control.click();choice=await wait(radio);}
+   if(!choice)throw Error('Term '+term+' is not available in your portal.');
+   if(!choice.checked){
+    const before=all('a[href*="academics-detail"]').map(a=>a.href).join('|');
+    choice.click();
+    if(!await wait(()=>choice.checked))throw Error('The portal did not select Term '+term+'. Select it in the portal and retry.');
+    if(!await wait(()=>{const now=all('a[href*="academics-detail"]').map(a=>a.href).join('|');return now!==before;}))throw Error('The course list did not refresh after changing terms. Wait for the portal to load and retry.');
+   }
+  }
+
   const links=await wait(()=>{const a=all('a[href]').filter(a=>{try{const u=new URL(a.href);return u.origin===location.origin&&u.pathname==='/academics-detail'}catch{return false}});return a.length?a:null});
   if(!links)throw Error('No courses visible. Complete university sign-in and dismiss any portal prompt, then search again.');
   const code=String(payload.code||'').trim().toUpperCase();

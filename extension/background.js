@@ -5,7 +5,7 @@ let working=false;
 chrome.runtime.onMessage.addListener((message,sender,reply)=>{
  let origin;try{origin=new URL(sender.url).origin}catch{return}
  if(!appOrigins.has(origin))return;
- if(message.action==='ping'){reply({data:{version:'0.4.0'}});return}
+ if(message.action==='ping'){reply({data:{version:'0.5.0'}});return}
  if(!['login','courses','lectures','materials','transcript'].includes(message.action))return;
  if(working){reply({error:'A portal search is already running. Wait for it to finish.'});return}
  working=true;run(message).then(data=>reply({data})).catch(e=>reply({error:e.message||'Portal search failed.'})).finally(()=>{working=false});return true;
