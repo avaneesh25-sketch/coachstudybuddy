@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CoachStudyBuddy Portal Connector",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Connect CoachStudyBuddy to your signed-in university courses and lecture materials.",
   "permissions": [
     "activeTab",
@@ -9,7 +9,9 @@
   ],
   "host_permissions": [
     "http://127.0.0.1/*",
-    "https://coach.mastersunion.org/*"
+    "https://coach.mastersunion.org/*",
+    "https://coachstudybuddy.vercel.app/*",
+    "http://localhost:3001/*"
   ],
   "action": {
     "default_popup": "popup.html",
