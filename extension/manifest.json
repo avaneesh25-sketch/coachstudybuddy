@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "CoachStudyBuddy Portal Connector",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Connect CoachStudyBuddy to your signed-in university courses and lecture materials.",
   "permissions": [
     "activeTab",
-    "scripting"
+    "scripting",
+    "webNavigation"
   ],
   "host_permissions": [
     "http://127.0.0.1/*",

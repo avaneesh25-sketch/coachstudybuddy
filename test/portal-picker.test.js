@@ -10,7 +10,7 @@ test('course discovery works for unrelated codes, punctuation and duplicate code
  for(const code of new Set(codes)){const r=await dom('courses',{code:' '+code.toLowerCase()+' '},links);assert.equal(r.courses.length,codes.filter(c=>c===code).length);assert.ok(r.courses.every(c=>c.code===code));}
  assert.deepEqual((await dom('courses',{code:'NOT-ENROLLED'},links)).courses,[]);
 });
-test('extension bridge is restricted to the production and local app origins',async()=>{const m=JSON.parse((await readFile(new URL('../extension/manifest.json',import.meta.url),'utf8')).replace(/^\uFEFF/,''));assert.equal(m.version,'0.11.0');assert.equal(m.background.service_worker,'background.js');assert.ok(m.host_permissions.includes('https://coach.mastersunion.org/*'));assert.ok(!m.host_permissions.includes('<all_urls>'));assert.deepEqual(m.content_scripts[0].matches,['https://coachstudybuddy.vercel.app/*','http://127.0.0.1:3001/*','http://localhost:3001/*'])});
+test('extension bridge is restricted to the production and local app origins',async()=>{const m=JSON.parse((await readFile(new URL('../extension/manifest.json',import.meta.url),'utf8')).replace(/^\uFEFF/,''));assert.equal(m.version,'0.12.0');assert.equal(m.background.service_worker,'background.js');assert.ok(m.host_permissions.includes('https://coach.mastersunion.org/*'));assert.ok(!m.host_permissions.includes('<all_urls>'));assert.deepEqual(m.content_scripts[0].matches,['https://coachstudybuddy.vercel.app/*','http://127.0.0.1:3001/*','http://localhost:3001/*'])});
 
 test('already-open detail heading does not shadow the matching session card',async()=>{
  const old={document:globalThis.document,location:globalThis.location,getComputedStyle:globalThis.getComputedStyle};let opened=false;

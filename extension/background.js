@@ -8,7 +8,7 @@ let working=false;
 chrome.runtime.onMessage.addListener((message,sender,reply)=>{
  let origin;try{origin=new URL(sender.url).origin}catch{return}
  if(!appOrigins.has(origin))return;
- if(message.action==='ping'){reply({data:{version:'0.11.0'}});return}
+ if(message.action==='ping'){reply({data:{version:'0.12.0'}});return}
  if(!['login','courses','lectures','materials','transcript','bot-observe','bot-act','open-term','open-courses'].includes(message.action))return;
  if(working){reply({error:'A portal search is already running. Wait for it to finish.'});return}
  working=true;run(message).then(data=>reply({data})).catch(e=>reply({error:e.message||'Portal search failed.'})).finally(()=>{working=false});return true;
@@ -36,6 +36,6 @@ async function run({action,payload={}}){
  for(let i=0;i<40;i++){const current=await chrome.tabs.get(tab.id);if(current.status==='complete'){if(/\/login|\/auth|\/sso/i.test(current.url))throw Error('Sign in on the university portal, then return here and search again.');break}await new Promise(r=>setTimeout(r,250))}
  const [{result}]=await chrome.scripting.executeScript({target:{tabId:tab.id},func:portalAction,args:[action,payload]});
  if(result?.error)throw Error(result.error);if(!result)throw Error('Could not read the portal. Sign in and try again.');
- if(action==='materials'){for(const card of (result.cards||[]).slice(0,5)){try{const material=await resolveResourceCard(chrome,tab.id,card,result.lecture.title);if(!result.materials.some(m=>m.url===material.url))result.materials.push(material)}catch(e){result.unsupported.push({...card,status:e.message})}}if(result.materials.length)result.warning='Found '+result.materials.length+' accessible lecture documents.';}
+ if(action==='materials'){for(const card of (result.cards||[]).slice(0,5)){try{const material=await resolveResourceCard(chrome,tab.id,card,result.lecture.title);if(!result.materials.some(m=>m.url===material.url))result.materials.push(material)}catch(e){result.unsupported.push({...card,status:e.message,needsUserAction:true})}}if(result.materials.length)result.warning='Found '+result.materials.length+' accessible lecture documents.';else if(result.cards?.length)result.warning='Found '+result.cards.length+' material cards, but their document tabs could not be confirmed. See each result below.';}
  return result;
 }
