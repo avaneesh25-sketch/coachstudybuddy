@@ -8,16 +8,19 @@ export async function portalAction(action,payload){
  if(action==='courses'){
   if(payload.term!==undefined){
    const term=String(payload.term);if(!/^\d$/.test(term))throw Error('Choose a valid term.');
-   const radio=()=>all('input[type="radio"]').find(e=>(e.closest('label')?.innerText||e.parentElement?.innerText||'').trim().replace(/\s+/g,' ').match(new RegExp('^Term '+term+'(?: Current)?$')));
-   let choice=radio();
-   if(!choice){const control=await wait(()=>all('button,div,span').find(e=>e.children.length===0&&/^Term \d+(?: Current)?$/.test(e.textContent.trim())));if(!control)throw Error('Term selector not found. Open Courses in the portal and try again.');control.click();choice=await wait(radio);}
-   if(!choice)throw Error('Term '+term+' is not available in your portal.');
-   if(!choice.checked){
-    const before=all('a[href*="academics-detail"]').map(a=>a.href).join('|');
+   const selected=()=>document.querySelector('#termFilter .selectedOption')?.textContent.trim().replace(/\s+/g,' ');
+   if(selected()!=='Term '+term){
+    const control=await wait(()=>all('#termFilter .selectedOption')[0]);
+    if(!control)throw Error('Portal reachable, but its term dropdown was not found. Try AI-assisted search.');
+    control.click();
+    const choice=await wait(()=>all('#termFilter label').find(e=>e.textContent.trim().replace(/Current/g,'').replace(/\s+/g,' ').trim()==='Term '+term));
+    if(!choice)throw Error('Term '+term+' is not available in this account.');
+    const before=all('a[href]').map(e=>e.href).join('|');
     choice.click();
-    if(!await wait(()=>choice.checked))throw Error('The portal did not select Term '+term+'. Select it in the portal and retry.');
-    if(!await wait(()=>{const now=all('a[href*="academics-detail"]').map(a=>a.href).join('|');return now!==before;}))throw Error('The course list did not refresh after changing terms. Wait for the portal to load and retry.');
+    if(!await wait(()=>selected()==='Term '+term))throw Error('The portal did not confirm Term '+term+'.');
+    if(!await wait(()=>{const after=all('a[href]').map(e=>e.href).join('|');return after&&after!==before;}))throw Error('The term changed but courses have not refreshed. Wait and retry.');
    }
+
   }
 
   const links=await wait(()=>{const a=all('a[href]').filter(a=>{try{const u=new URL(a.href);return u.origin===location.origin&&u.pathname==='/academics-detail'}catch{return false}});return a.length?a:null});

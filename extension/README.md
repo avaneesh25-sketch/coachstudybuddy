@@ -1,11 +1,11 @@
-# University connector v0.3
+# University connector v0.6
 
-Load this folder as an unpacked Chrome/Edge extension. Reload CoachStudyBuddy after installing or upgrading. Open https://coachstudybuddy.vercel.app or http://127.0.0.1:3001 in the same browser profile, click Sign in to university portal, complete sign-in directly there, then search a subject code and select a lecture.
+Install in Chrome or Edge and sign in to the university in the same browser profile. The in-app browser cannot load this extension.
 
-The app content script accepts only known request types from its own window/origin. The extension background accepts only the production app and explicit local development origins. Portal access is limited to coach.mastersunion.org. No cookies, credentials, private API calls, recordings or hidden framework state are read. Only user-triggered visible-page navigation and extraction are performed. The bridge uses browser messages, not server pairing or persistent tokens.
+The popup reports extension/portal reachability without opening another landing page. CoachStudyBuddy separately reports whether the course and lecture list actually loaded. A successful extension ping is not proof of working course search.
 
-Course lookup preserves termCourseId because codes may repeat. Lectures are parsed from visible session labels, and the chosen session is expanded using normal read-only controls. Accessible direct Filestack document links are returned to the app, which requests extraction. Interactive cards without links and protected or external documents can remain unsupported. No claim of complete course coverage is made.
+Course lookup uses the observed #termFilter .selectedOption dropdown and its separate labels, waits for the selected term and course-list refresh, then matches the exact course code. Navigation uses a Courses tab rather than replacing an existing lecture-player tab.
 
-This is a development extension, not a store release. Live extraction must be verified after installation. No fake lecture choices or private course data are bundled.
+Optional AI course search uses the app's selected OpenAI, Gemini or OpenAI-compatible JSON model. Maximum four model calls. The model chooses only freshly observed allowlisted term/course controls; the extension revalidates label and kind before acting. No arbitrary code, credentials, assignments, recording, permission changes or restricted downloads. Visible page content is untrusted evidence. Missing controls and repeated actions stop the bot.
 
-Version 0.4 adds the official transcript action. It requires the selected recording and Download Transcript control to be visible. It reads only official links or newly exposed download anchors; it never reads hidden API state or recording streams. If the file is not exposed, import the downloaded transcript in the app. Reload this extension and CoachStudyBuddy after updating.
+Screenshots are optional and explicitly selected in the app. They require an image-capable model and browser screenshot permission (click this extension on the university Courses tab first). Only the active university Courses tab is captured. Images and control labels are sent through the app to the selected provider for inference; this does not train a model. No credentials are sent by the connector. Provider billing and data-handling terms apply.
