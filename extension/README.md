@@ -1,4 +1,4 @@
-# University connector v0.9
+# University connector v0.10
 
 Install in Chrome or Edge and sign in to the university in the same browser profile. The in-app browser cannot load this extension.
 
