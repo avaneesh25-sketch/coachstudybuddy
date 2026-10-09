@@ -5,7 +5,7 @@ export async function portalAction(action,payload){
  const all=(selector,root=document)=>[...root.querySelectorAll(selector)].filter(visible);
  const wait=async fn=>{for(let i=0;i<40;i++){const value=fn();if(value)return value;await new Promise(r=>setTimeout(r,250))}return null};
  if(location.origin!=='https://coach.mastersunion.org')throw Error('Sign in to the university portal first.');
- if(action==='courses'){
+ if(action==='courses'||action==='open-term'){
   if(payload.term!==undefined){
    const term=String(payload.term);if(!/^\d$/.test(term))throw Error('Choose a valid term.');
    const selected=()=>document.querySelector('#termFilter .selectedOption')?.textContent.trim().replace(/\s+/g,' ');
@@ -23,6 +23,7 @@ export async function portalAction(action,payload){
 
   }
 
+  if(action==='open-term')return {opened:true,term:payload.term};
   const links=await wait(()=>{const a=all('a[href]').filter(a=>{try{const u=new URL(a.href);return u.origin===location.origin&&u.pathname==='/academics-detail'}catch{return false}});return a.length?a:null});
   if(!links)throw Error('No courses visible. Complete university sign-in and dismiss any portal prompt, then search again.');
   const code=String(payload.code||'').trim().toUpperCase();
