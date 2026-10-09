@@ -1,6 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {documentLink,resolveResourceCard} from '../extension/resource-cards.js';
+import {documentLink,resolveResourceCard,openResourceCard} from '../extension/resource-cards.js';
+test('click targets the nested document title rather than its noninteractive parent',()=>{
+ const previous=globalThis.document;let clicked=false;
+ const title={textContent:'Case PDF',click(){clicked=true}};
+ const card={getClientRects:()=>[1],querySelector:()=>title,click(){throw Error('Parent cannot open the document')}};
+ const panel={querySelector:()=>card,querySelectorAll:()=>[card]};
+ globalThis.document={querySelectorAll:()=>[{textContent:'Session 2',getClientRects:()=>[1],parentElement:panel}]};
+ try{assert.deepEqual(openResourceCard('Case PDF','Session 2'),{opened:true});assert.ok(clicked)}finally{globalThis.document=previous}
+});
 import {downloadLibraryFile} from '../lib/github-library.js';
 import {extractDocument,documentExtension} from '../lib/materials.js';
 import {zipSync,strToU8} from 'fflate';

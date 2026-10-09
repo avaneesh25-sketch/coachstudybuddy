@@ -1,4 +1,4 @@
-# University connector v0.12
+# University connector v0.13
 
 Install in Chrome or Edge and sign in to the university in the same browser profile. The in-app browser cannot load this extension.
 
@@ -10,5 +10,5 @@ Optional AI course search uses the app's selected OpenAI, Gemini or OpenAI-compa
 
 Screenshots are optional and explicitly selected in the app. They require an image-capable model and browser screenshot permission (click this extension on the university Courses tab first). Only the active university Courses tab is captured. Images and control labels are sent through the app to the selected provider for inference; this does not train a model. No credentials are sent by the connector. Provider billing and data-handling terms apply.
 
-## v0.12 permission change
+## v0.13 permission change
 The connector uses Chrome webNavigation to associate a new document tab with the university tab that opened it, including links without openerTabId. Listeners run only during material-card imports and discard events from other source tabs. Approve the updated extension permission when Chrome or Edge prompts, then reload the app and portal tabs.

@@ -7,7 +7,9 @@ export function openResourceCard(title,lectureTitle){
  if(!panel||panel===document.body||panel===document.documentElement)return {error:'Open the selected session panel first.'};
  const cards=[...(panel?.querySelectorAll('.resourcesBlockContent.clickable')||[])].filter(e=>e.getClientRects().length&&e.querySelector('.resourceTitle')?.textContent.trim()===title);
  if(cards.length!==1)return {error:'The selected pre-read card could not be identified. Open it in the portal and retry.'};
- cards[0].click();return {opened:true};
+ const titleElement=cards[0].querySelector('.resourceTitle');
+ if(!titleElement)return {error:'The document title is unavailable.'};
+ titleElement.click();return {opened:true};
 }
 export async function resolveResourceCard(api,tabId,card,lectureTitle){
  let found;const created=new Set();
