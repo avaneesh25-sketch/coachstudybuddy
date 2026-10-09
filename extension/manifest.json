@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CoachStudyBuddy Portal Connector",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Connect CoachStudyBuddy to your signed-in university courses and lecture materials.",
   "permissions": [
     "activeTab",

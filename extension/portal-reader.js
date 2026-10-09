@@ -27,7 +27,7 @@ export async function portalAction(action,payload){
   const links=await wait(()=>{const a=all('a[href]').filter(a=>{try{const u=new URL(a.href);return u.origin===location.origin&&u.pathname==='/academics-detail'}catch{return false}});return a.length?a:null});
   if(!links)throw Error('No courses visible. Complete university sign-in and dismiss any portal prompt, then search again.');
   const code=String(payload.code||'').trim().toUpperCase();
-  const courses=links.map(a=>{const u=new URL(a.href);return {id:u.searchParams.get('termCourseId'),code:u.searchParams.get('courseCode'),name:a.innerText.trim().replace(/\s+/g,' ').slice(0,240),url:u.href}}).filter(c=>c.id&&c.code?.toUpperCase()===code);
+  const courses=links.map(a=>{const u=new URL(a.href);return {id:u.searchParams.get('termCourseId'),code:u.searchParams.get('courseCode'),name:(a.querySelector?.('h3,h4')?.textContent||a.innerText).trim().replace(/\s+/g,' ').slice(0,240),url:u.href}}).filter(c=>c.id&&c.code?.toUpperCase()===code);
   return {courses:[...new Map(courses.map(c=>[c.id,c])).values()]};
  }
  const labels=await wait(()=>{const found=all('p.name').filter(e=>/^Session\s+\d+\s*:/i.test(e.textContent.trim()));return found.length?found:null});
@@ -41,7 +41,7 @@ export async function portalAction(action,payload){
  const header=chosen.closest('.flex-cont');const card=header?.parentElement;if(!card)throw Error('The selected session card could not be located. Transcript download is separate: use Import official transcript from open player.');
  if(!all('div.view',card).length){header.click();await wait(()=>all('div.view',card).length)}
  const view=all('div.view',card).find(e=>e.textContent.trim()==='View All');if(view)view.click();
- const materialHeading=await wait(()=>all('h1,h2,h3,h4,h5').find(e=>/^Materials$/i.test(e.textContent.trim())));
+ const materialHeading=await wait(()=>all('h1,h2,h3,h4,h5').find(e=>{if(!/^Materials$/i.test(e.textContent.trim()))return false;const title=e.closest('.body')?.parentElement?.querySelector('p.session-name')?.textContent.trim();return !title||title===chosen.textContent.trim()}));
  const scopes=[{root:card,category:'Lecture materials'}];
  if(materialHeading){let root=materialHeading.parentElement;for(let i=0;i<3&&root.parentElement;i++){if(root.querySelector('a[href]'))break;if(root.parentElement.textContent.length>20000)break;root=root.parentElement}scopes.push({root,category:'Materials'})}
  // Open only named read-only resource sections. Never assignments, feedback or submissions.
@@ -54,7 +54,7 @@ export async function portalAction(action,payload){
  const preRead=all('div,span,a',card).find(e=>e.children.length===0&&/^\(?\s*Click to View\s*\)?$/i.test(e.textContent.trim()));if(preRead){preRead.click();await new Promise(r=>setTimeout(r,500));for(const h of all('h2,h3,h4,h5').filter(e=>/^Pre\s*-?\s*Read(?: Material)?$/i.test(e.textContent.trim()))){let root=h.parentElement;for(let i=0;i<2&&root.parentElement&&!root.querySelector('a[href]');i++)root=root.parentElement;scopes.push({root,category:'Pre-read'})}}
  const panelBody=materialHeading?.closest('.body');
  const panelTitle=panelBody?.parentElement?.querySelector('p.session-name')?.textContent.trim();
- const cards=panelTitle===chosen.textContent.trim()?all('.resourcesBlockContent.clickable',panelBody).map(e=>({name:e.querySelector('.resourceTitle')?.textContent.trim(),category:'Pre-read'})).filter(e=>e.name):[];
+ const cards=panelTitle===chosen.textContent.trim()?all('.resourcesBlockContent.clickable',panelBody).map(e=>({name:e.querySelector('.resourceTitle')?.textContent.trim(),category:e.parentElement.querySelector('.resourcesBlockTitle')?.textContent.trim()||'Lecture materials'})).filter(e=>e.name):[];
  const materials=[],unsupported=[];
  for(const {root,category}of scopes)for(const a of all('a[href]',root)){let u;try{u=new URL(a.href)}catch{continue}if(!['https:','http:'].includes(u.protocol)||u.origin===location.origin)continue;const name=(a.innerText||a.title||'Course document').trim();if(!name||/^mailto:/.test(a.href))continue;
  if(u.origin==='https://cdn.filestackcontent.com'&&!u.search&&!u.hash&&/^\/[A-Za-z0-9]{16,64}$/.test(u.pathname))materials.push({name,url:u.href,category});else if(/pdf|ppt|read|case|material|resource/i.test(name))unsupported.push({name,category})}
