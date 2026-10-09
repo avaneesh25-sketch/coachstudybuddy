@@ -32,10 +32,13 @@ export async function portalAction(action,payload){
  }
  const labels=await wait(()=>{const found=all('p.name').filter(e=>/^Session\s+\d+\s*:/i.test(e.textContent.trim()));return found.length?found:null});
  if(!labels)throw Error('No lecture list visible. Open Sessions in the course and try again.');
- const lectures=labels.map(e=>({id:e.textContent.trim().match(/^Session\s+(\d+)/i)[1],title:e.textContent.trim(),date:e.parentElement.querySelector('.date')?.textContent.trim()||''}));
+ const listLabels=labels.filter(e=>e.closest('.flex-cont'));
+ const lectureLabels=listLabels.length?listLabels:labels;
+ const lectures=lectureLabels.map(e=>({id:e.textContent.trim().match(/^Session\s+(\d+)/i)[1],title:e.textContent.trim(),date:e.parentElement.querySelector('.date')?.textContent.trim()||''}));
  if(action==='lectures')return {lectures:[...new Map(lectures.map(l=>[l.id,l])).values()]};
- const chosen=labels.find(e=>e.textContent.trim().match(/^Session\s+(\d+)/i)[1]===String(payload.lectureId));if(!chosen)throw Error('The selected lecture is no longer visible. Refresh the lecture list.');
- const header=chosen.closest('.flex-cont');const card=header?.parentElement;if(!card)throw Error('The lecture layout changed. No materials were imported.');
+ const matches=labels.filter(e=>e.textContent.trim().match(/^Session\s+(\d+)/i)[1]===String(payload.lectureId));
+ const chosen=matches.find(e=>e.closest('.flex-cont'))||matches[0];if(!chosen)throw Error('The selected lecture is no longer visible. Refresh the lecture list.');
+ const header=chosen.closest('.flex-cont');const card=header?.parentElement;if(!card)throw Error('The selected session card could not be located. Transcript download is separate: use Import official transcript from open player.');
  if(!all('div.view',card).length){header.click();await wait(()=>all('div.view',card).length)}
  const view=all('div.view',card).find(e=>e.textContent.trim()==='View All');if(view)view.click();
  const materialHeading=await wait(()=>all('h1,h2,h3,h4,h5').find(e=>/^Materials$/i.test(e.textContent.trim())));
