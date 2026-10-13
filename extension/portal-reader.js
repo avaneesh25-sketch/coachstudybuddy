@@ -1,5 +1,7 @@
 // Only visible page content is read. No cookies, tokens, private APIs or framework state.
 export async function portalAction(action,payload){
+ function youtubeUrl(raw){try{const u=new URL(raw);if(u.protocol!=='https:'||u.username||u.password||u.port)return null;let id;if(u.hostname==='youtu.be')id=u.pathname.slice(1);else if(['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname)){if(u.pathname==='/watch')id=u.searchParams.get('v');else id=u.pathname.match(/^\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})\/?$/)?.[1];}return /^[A-Za-z0-9_-]{11}$/.test(id||'')?'https://www.youtube.com/watch?v='+id:null}catch{return null}}
+
  try{
  const visible=e=>!!e.getClientRects().length&&getComputedStyle(e).visibility!=='hidden'&&!e.closest('[aria-hidden="true"]');
  const all=(selector,root=document)=>[...root.querySelectorAll(selector)].filter(visible);
@@ -57,7 +59,7 @@ export async function portalAction(action,payload){
  const cards=panelTitle===chosen.textContent.trim()?all('.resourcesBlockContent.clickable',panelBody).map(e=>({name:e.querySelector('.resourceTitle')?.textContent.trim(),category:e.parentElement.querySelector('.resourcesBlockTitle')?.textContent.trim()||'Lecture materials'})).filter(e=>e.name):[];
  const materials=[],unsupported=[];
  for(const {root,category}of scopes)for(const a of all('a[href]',root)){let u;try{u=new URL(a.href)}catch{continue}if(!['https:','http:'].includes(u.protocol)||u.origin===location.origin)continue;const name=(a.innerText||a.title||'Course document').trim();if(!name||/^mailto:/.test(a.href))continue;
- if(u.origin==='https://cdn.filestackcontent.com'&&!u.search&&!u.hash&&/^\/[A-Za-z0-9]{16,64}$/.test(u.pathname))materials.push({name,url:u.href,category});else if(/pdf|ppt|read|case|material|resource/i.test(name))unsupported.push({name,category})}
+ if(youtubeUrl(u.href))materials.push({name,url:youtubeUrl(u.href),category,kind:'youtube'});else if(u.origin==='https://cdn.filestackcontent.com'&&!u.search&&!u.hash&&/^\/[A-Za-z0-9]{16,64}$/.test(u.pathname))materials.push({name,url:u.href,category});else if(/pdf|ppt|read|case|material|resource/i.test(name))unsupported.push({name,category})}
  const unique=[...new Map(materials.map(m=>[m.url,m])).values()].slice(0,20);
  return {materials:unique,cards,unsupported,lecture:lectures.find(l=>l.id===String(payload.lectureId)),warning:unique.length?'Only accessible document links are imported. Interactive cards and protected files may require opening in the portal.':'The lecture opened, but no supported document links were visible. Open Materials or Pre-Read in the portal, then retry. No files were uploaded or restrictions bypassed.'};
  }catch(e){return {error:e.message||'Unable to inspect this portal page.'}}

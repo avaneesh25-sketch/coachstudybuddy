@@ -1,4 +1,5 @@
-export function documentLink(raw){try{const u=new URL(raw);return u.origin==='https://cdn.filestackcontent.com'&&!u.search&&!u.hash&&/^\/[A-Za-z0-9]{16,64}$/.test(u.pathname)?u.href:null}catch{return null}}
+export function youtubeUrl(raw){try{const u=new URL(raw);if(u.protocol!=='https:'||u.username||u.password||u.port)return null;let id;if(u.hostname==='youtu.be')id=u.pathname.slice(1);else if(['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname)){if(u.pathname==='/watch')id=u.searchParams.get('v');else id=u.pathname.match(/^\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})\/?$/)?.[1];}return /^[A-Za-z0-9_-]{11}$/.test(id||'')?'https://www.youtube.com/watch?v='+id:null}catch{return null}}
+export function documentLink(raw){try{const video=youtubeUrl(raw);if(video)return video;const u=new URL(raw);return u.origin==='https://cdn.filestackcontent.com'&&!u.search&&!u.hash&&/^\/[A-Za-z0-9]{16,64}$/.test(u.pathname)?u.href:null}catch{return null}}
 // Click only the observed material title in the selected session's panel.
 export function openResourceCard(title,lectureTitle){
  const headings=[...document.querySelectorAll('p.session-name')].filter(e=>e.getClientRects().length&&e.textContent.trim()===lectureTitle);
@@ -23,6 +24,6 @@ export async function resolveResourceCard(api,tabId,card,lectureTitle){
  try{const [{result}]=await api.scripting.executeScript({target:{tabId},func:openResourceCard,args:[card.name,lectureTitle]});if(result?.error)throw Error(result.error);
   for(let i=0;i<40&&!found;i++)await new Promise(r=>setTimeout(r,200));
   if(!found)throw Error('The connector could not confirm this card’s document tab. If no tab opened, allow pop-ups for the university portal and retry. If a PDF tab did open, update/reload the connector and check its permissions.');
-  return {...card,url:found.url};
+  return {...card,url:found.url,...(youtubeUrl(found.url)?{kind:'youtube'}:{})};
  }finally{api.tabs.onCreated.removeListener(observe);api.tabs.onUpdated.removeListener(updated);api.webNavigation?.onCreatedNavigationTarget.removeListener(navigation)}
 }
