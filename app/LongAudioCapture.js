@@ -26,6 +26,7 @@ export default function LongAudioCapture({apiKey,config,onTranscript,onActiveCha
   if(locked.current||!consent)return;locked.current=true;setPhase('starting');notify.current(true);setMessage('');
   let media;
   try{
+   if(!Number.isFinite(Number(origin))||Number(origin)<0)throw Error('Enter a valid starting position.');
    if(!navigator.mediaDevices?.getDisplayMedia)throw Error('Use Chrome or Edge and select the lecture tab.');
    media=await navigator.mediaDevices.getDisplayMedia(tabCaptureOptions);
    if(!mounted.current)throw Error('Capture cancelled.');
