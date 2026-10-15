@@ -3,7 +3,7 @@ import {useEffect,useRef,useState} from 'react';
 import {MAX_CAPTURE_SECONDS,tabCaptureOptions} from '../lib/capture-session.js';
 import {recordingWriter} from '../lib/recording-writer';
 
-export default function VideoCapture({token}) {
+export default function VideoCapture({token,managed=false}) {
  const [name,setName]=useState('SAMA7101 - Session 1'),[handle,setHandle]=useState(null),[phase,setPhase]=useState('idle'),[message,setMessage]=useState(''),[consent,setConsent]=useState(false),[seconds,setSeconds]=useState(0),[bytes,setBytes]=useState(0);
  const active=useRef(null),mounted=useRef(true),locked=useRef(false);
  const running=phase==='recording',busy=phase==='starting'||phase==='saving';
@@ -15,7 +15,7 @@ export default function VideoCapture({token}) {
   if(locked.current||!handle||!consent)return;locked.current=true;setPhase('starting');setMessage('');setSeconds(0);setBytes(0);
   let media,file,wake;
   try{
-   const access=await fetch('/api/video-access',{method:'POST',headers:{'x-github-token':token}});if(!access.ok)throw Error('Verify your personal account again before recording.');if(!mounted.current)return;
+   const access=await fetch(managed?'/api/study/video-access':'/api/video-access',{method:'POST',headers:{'x-github-token':token}});if(!access.ok)throw Error('Verify your personal account again before recording.');if(!mounted.current)return;
    media=await navigator.mediaDevices.getDisplayMedia(tabCaptureOptions);
    if(!mounted.current)throw Error('Capture cancelled.');
    if(media.getVideoTracks()[0]?.getSettings().displaySurface!=='browser')throw Error('Choose a Chrome Tab, not a window or screen.');
