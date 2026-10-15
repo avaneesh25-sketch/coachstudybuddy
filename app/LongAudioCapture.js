@@ -71,7 +71,7 @@ export default function LongAudioCapture({apiKey,config,onTranscript,onActiveCha
    setFailure('');
    await transcribeParts(items.current,async(p,signal)=>{
     if(p.blob.size>4*1024*1024)throw Error('Audio exceeds the upload limit; download this part for recovery.');
-    return readTranscriptionResponse(await fetch(config.managed?'/api/study/transcribe':'/api/transcribe',{method:'POST',signal,headers:{'Content-Type':'audio/webm','x-api-key':apiKey,'x-provider':config.provider,'x-base-url':config.baseUrl||'','x-model':config.model,'x-audio-model':config.audioModel||'',...(config.managed?studyHeaders(config.lecture):{})},body:p.blob}));
+    return readTranscriptionResponse(await fetch(config.managed?'/api/study/transcribe':'/api/transcribe',{method:'POST',signal,headers:{'Content-Type':'audio/webm',...(config.managed?{}:{'x-api-key':apiKey}),'x-provider':config.provider,'x-base-url':config.baseUrl||'','x-model':config.model,'x-audio-model':config.audioModel||'',...(config.managed?studyHeaders(config.lecture):{})},body:p.blob}));
    },(i)=>{update();setMessage('Part '+(i+1)+' of '+items.current.length+' · '+items.current.filter(p=>p.transcript).length+' completed');});
    onTranscript(mergeCapturedParts(items.current,speed,Number(origin)));setMessage('Transcript ready. Return to Build study material.');
   }catch(e){setFailure(e.message||'Transcription stopped. Your audio is preserved.');setMessage(e.message);}finally{locked.current=false;setPhase('idle');notify.current(false);}
