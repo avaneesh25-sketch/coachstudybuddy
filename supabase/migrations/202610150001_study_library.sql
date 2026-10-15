@@ -45,7 +45,7 @@ begin
  -- Serialize each day's allowance update across instances.
  perform pg_advisory_xact_lock(hashtext('coach-study-'||today::text));
  select coalesce(sum(calls),0) into global_used from study_usage where day=today and kind=p_kind;
- if global_used >= case when p_kind='transcribe' then 300 else 50 end then return false; end if;
+ if global_used >= (case when p_kind='transcribe' then 300 else 50 end) then return false; end if;
  insert into study_usage(user_id,kind,day,calls) values(p_user,p_kind,today,1)
  on conflict(user_id,kind,day) do update set calls=study_usage.calls+1 where study_usage.calls<daily_max
  returning calls into used;
