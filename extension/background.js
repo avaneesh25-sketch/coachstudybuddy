@@ -1,3 +1,4 @@
+import {readPortalSession} from './session-status.js';
 import {resolveResourceCard} from './resource-cards.js';
 import {openCourseTabs} from './manual-course.js';
 import {portalBot} from './portal-bot.js';
@@ -8,13 +9,17 @@ let working=false;
 chrome.runtime.onMessage.addListener((message,sender,reply)=>{
  let origin;try{origin=new URL(sender.url).origin}catch{return}
  if(!appOrigins.has(origin))return;
- if(message.action==='ping'){reply({data:{version:'0.14.0'}});return}
- if(!['login','courses','lectures','materials','transcript','bot-observe','bot-act','open-term','open-courses'].includes(message.action))return;
+ if(message.action==='ping'){reply({data:{version:'0.15.0'}});return}
+ if(!['session-status','login','courses','lectures','materials','transcript','bot-observe','bot-act','open-term','open-courses'].includes(message.action))return;
  if(working){reply({error:'A portal search is already running. Wait for it to finish.'});return}
  working=true;run(message).then(data=>reply({data})).catch(e=>reply({error:e.message||'Portal search failed.'})).finally(()=>{working=false});return true;
 });
 async function run({action,payload={}}){
  const tabs=await chrome.tabs.query({url:'https://coach.mastersunion.org/*'});
+ if(action==='session-status'){
+  for(const candidate of tabs){try{const [{result}]=await chrome.scripting.executeScript({target:{tabId:candidate.id},func:readPortalSession});if(result?.signedIn)return {signedIn:true};}catch{}}
+  return {signedIn:false};
+ }
  if(action==='open-courses')return {courses:openCourseTabs(tabs)};
  let tab=action==='transcript'?(tabs.find(t=>t.active)||tabs[0]):tabs.find(t=>new URL(t.url).pathname==='/courses');
  if(payload.courseUrl)tab=tabs.find(t=>t.url===payload.courseUrl)||tab;
