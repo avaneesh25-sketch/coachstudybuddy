@@ -1,0 +1,3 @@
+import {sameOrigin,reply,failure} from '../../../../lib/http.js';
+import {PERSONAL_COOKIE,createPersonalSession,readPersonalSession,personalToken} from '../../../../lib/personal-ai.js';
+export async function POST(request){try{sameOrigin(request);const existing=personalToken(request);const token=readPersonalSession(existing)?existing:createPersonalSession();const response=reply({ready:true});response.headers.set('Set-Cookie',`${PERSONAL_COOKIE}=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=86400${new URL(request.url).protocol==='https:'?'; Secure':''}`);return response;}catch(e){return failure(e);}}
