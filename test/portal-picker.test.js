@@ -10,7 +10,7 @@ test('course discovery works for unrelated codes, punctuation and duplicate code
  for(const code of new Set(codes)){const r=await dom('courses',{code:' '+code.toLowerCase()+' '},links);assert.equal(r.courses.length,codes.filter(c=>c===code).length);assert.ok(r.courses.every(c=>c.code===code));}
  assert.deepEqual((await dom('courses',{code:'NOT-ENROLLED'},links)).courses,[]);
 });
-test('extension bridge is restricted to the production and local app origins',async()=>{const m=JSON.parse((await readFile(new URL('../extension/manifest.json',import.meta.url),'utf8')).replace(/^\uFEFF/,''));assert.equal(m.version,'0.15.0');assert.equal(m.background.service_worker,'background.js');assert.ok(m.host_permissions.includes('https://coach.mastersunion.org/*'));assert.ok(!m.host_permissions.includes('<all_urls>'));assert.deepEqual(m.content_scripts[0].matches,['https://coachstudybuddy.vercel.app/*','http://127.0.0.1:3001/*','http://localhost:3001/*'])});
+test('extension bridge is restricted to the production and local app origins',async()=>{const m=JSON.parse((await readFile(new URL('../extension/manifest.json',import.meta.url),'utf8')).replace(/^\uFEFF/,''));assert.equal(m.version,'0.16.0');assert.equal(m.background.service_worker,'background.js');assert.ok(m.host_permissions.includes('https://coach.mastersunion.org/*'));assert.ok(!m.host_permissions.includes('<all_urls>'));assert.deepEqual(m.content_scripts[0].matches,['https://coachstudybuddy.vercel.app/*','http://127.0.0.1:3001/*','http://localhost:3001/*'])});
 
 test('already-open detail heading does not shadow the matching session card',async()=>{
  const old={document:globalThis.document,location:globalThis.location,getComputedStyle:globalThis.getComputedStyle};let opened=false;
@@ -26,3 +26,5 @@ test('already-open detail heading does not shadow the matching session card',asy
  globalThis.document={querySelectorAll:s=>s==='p.name'?[overlay,row]:s==='h1,h2,h3,h4,h5'?[heading]:[]};
  try{const result=await portalAction('materials',{lectureId:'2'});assert.equal(result.error,undefined);assert.ok(opened);assert.equal(result.materials[0].name,'Session 2 PDF');assert.equal(result.lecture.date,'17 Sep');}finally{Object.assign(globalThis,old)}
 });
+
+

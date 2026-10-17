@@ -52,7 +52,7 @@ export async function portalAction(action,payload){
   if(control){control.click();await new Promise(r=>setTimeout(r,350))}
  }
  // Course resources are included only when their section explicitly names this session.
- for(const h of all('h3,h4,h5').filter(e=>/^(Resources|Pre\s*-?\s*Reads?|Materials)$/i.test(e.textContent.trim()))){const root=h.parentElement;if(new RegExp('Session\\s+'+String(payload.lectureId)+'\\s*:','i').test(root.innerText))scopes.push({root,category:h.textContent.trim()})}
+ for(const h of all('h3,h4,h5').filter(e=>/^(Resources|(?:Pre|Post)\s*-?\s*Reads?|Materials)$/i.test(e.textContent.trim()))){const root=h.parentElement;if(new RegExp('Session\\s+'+String(payload.lectureId)+'\\s*:','i').test(root.innerText))scopes.push({root,category:h.textContent.trim()})}
  const preRead=all('div,span,a',card).find(e=>e.children.length===0&&/^\(?\s*Click to View\s*\)?$/i.test(e.textContent.trim()));if(preRead){preRead.click();await new Promise(r=>setTimeout(r,500));for(const h of all('h2,h3,h4,h5').filter(e=>/^Pre\s*-?\s*Read(?: Material)?$/i.test(e.textContent.trim()))){let root=h.parentElement;for(let i=0;i<2&&root.parentElement&&!root.querySelector('a[href]');i++)root=root.parentElement;scopes.push({root,category:'Pre-read'})}}
  const panelBody=materialHeading?.closest('.body');
  const panelTitle=panelBody?.parentElement?.querySelector('p.session-name')?.textContent.trim();
@@ -60,7 +60,7 @@ export async function portalAction(action,payload){
  const materials=[],unsupported=[];
  for(const {root,category}of scopes)for(const a of all('a[href]',root)){let u;try{u=new URL(a.href)}catch{continue}if(!['https:','http:'].includes(u.protocol)||u.origin===location.origin)continue;const name=(a.innerText||a.title||'Course document').trim();if(!name||/^mailto:/.test(a.href))continue;
  if(youtubeUrl(u.href))materials.push({name,url:youtubeUrl(u.href),category,kind:'youtube'});else if(u.origin==='https://cdn.filestackcontent.com'&&!u.search&&!u.hash&&/^\/[A-Za-z0-9]{16,64}$/.test(u.pathname))materials.push({name,url:u.href,category});else if(/pdf|ppt|read|case|material|resource/i.test(name))unsupported.push({name,category})}
- const unique=[...new Map(materials.map(m=>[m.url,m])).values()].slice(0,20);
+ const found=[...new Map(materials.map(m=>[m.url,m])).values()];const unique=found.slice(0,20);for(const item of found.slice(20))unsupported.push({...item,status:'Not imported: exceeds twenty-resource limit.'});
  return {materials:unique,cards,unsupported,lecture:lectures.find(l=>l.id===String(payload.lectureId)),warning:unique.length?'Only accessible document links are imported. Interactive cards and protected files may require opening in the portal.':'The lecture opened, but no supported document links were visible. Open Materials or Pre-Read in the portal, then retry. No files were uploaded or restrictions bypassed.'};
  }catch(e){return {error:e.message||'Unable to inspect this portal page.'}}
 }
